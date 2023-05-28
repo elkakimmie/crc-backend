@@ -11,6 +11,7 @@ class CosmosOperations(object):
     
               
     def __init__(self):
+        
         self.connection_string = "DefaultEndpointsProtocol=https;AccountName=cosmoscrctopcug;AccountKey=1xDPWxRXxmu2HuajVUU66yZ7rsHkTAVzFNbHcmvuVCGmZ9yX1dlePtQ1WioZtVmSx8tPqDARvDWbACDb0JCOlQ==;TableEndpoint=https://cosmoscrctopcug.table.cosmos.azure.com:443/;"
         self.table_name = "cloudres"
         self.entity = {
@@ -29,10 +30,9 @@ class CosmosOperations(object):
                     tsc = tsc.create_table(table_name)
                     print("Created table {}!".format(table_name))
                 except ResourceExistsError:
-                    print("Table with name {} already exists. Skipping...".format(table_name))
+                    print("Table with name {} already exists. Skipping...".format(table_name))                    
                     
-                    
-                
+               
     def create_entity(self):        
         with TableClient.from_connection_string(self.connection_string, self.table_name, self.user_agent) as tc:            
             try:

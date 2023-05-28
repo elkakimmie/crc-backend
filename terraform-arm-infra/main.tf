@@ -35,6 +35,8 @@ resource "azurerm_storage_container" "stc" {
   container_access_type = "private"
 }
 
+
+
 locals {
   cwd                = path.cwd
   module             = path.module

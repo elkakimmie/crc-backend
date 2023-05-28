@@ -162,8 +162,6 @@ resource "azurerm_resource_group_template_deployment" "ag" {
   template_content    = file("${path.module}/json/action-group.json")
 }
 #----------------------frontend---------------------------
-
-
 resource "azurerm_storage_account" "sttest" {
   name                     = var.sttest
   resource_group_name      = var.rg

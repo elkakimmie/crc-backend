@@ -36,7 +36,6 @@ resource "azurerm_storage_container" "stc" {
 }
 
 
-
 locals {
   cwd                = path.cwd
   module             = path.module
@@ -162,13 +161,13 @@ resource "azurerm_resource_group_template_deployment" "ag" {
   deployment_mode     = "Incremental"
   template_content    = file("${path.module}/json/action-group.json")
 }
-
 #----------------------frontend---------------------------
 
 
 resource "azurerm_storage_account" "sttest" {
   name                     = var.sttest
   resource_group_name      = var.rg
+  min_tls_version          = "TLS1_2"
   location                 = var.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
@@ -178,6 +177,8 @@ resource "azurerm_storage_account" "sttest" {
     error_404_document = "404.html"
   }
 }
+
+
 
 resource "azurerm_storage_blob" "frontend" {
   for_each               = fileset("../frontend", "**/*")

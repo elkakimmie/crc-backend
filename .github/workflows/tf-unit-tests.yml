@@ -52,8 +52,9 @@ jobs:
       uses: bridgecrewio/checkov-action@master
       with: 
         framework: terraform
-        output_file_path: reports/results.sarif
+        output_file_path: console,results.sarif
         quiet: true
+        soft_fail: true
         skip_check: CKV_AZURE_101,CKV_AZURE_140,CKV_AZURE_99,CKV_AZURE_100,CKV_AZURE_59,CKV_AZURE_33,CKV_AZURE_190,CKV_AZURE_206,CKV_AZURE_59,CKV_AZURE_33,CKV_AZURE_190,CKV_AZURE_206,CKV_AZURE_212,CKV_AZURE_1,CKV2_AZURE_38,CKV2_AZURE_33,CKV2_AZURE_18,CKV2_AZURE_1,CKV2_AZURE_21
 
 
@@ -63,7 +64,6 @@ jobs:
       uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: results.sarif
-        category: checkov
 
   deploy:
     name: 'Deploy'

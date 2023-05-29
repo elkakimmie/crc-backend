@@ -7,8 +7,7 @@ import logging
 from azure.core.exceptions import HttpResponseError
 from azure.core.exceptions import ResourceExistsError
 
-class CosmosOperations(object):  
-          
+class CosmosOperations(object):            
     def __init__(self):        
         self.connection_string = "DefaultEndpointsProtocol=https;AccountName=cosmoscrctopcug;AccountKey=1xDPWxRXxmu2HuajVUU66yZ7rsHkTAVzFNbHcmvuVCGmZ9yX1dlePtQ1WioZtVmSx8tPqDARvDWbACDb0JCOlQ==;TableEndpoint=https://cosmoscrctopcug.table.cosmos.azure.com:443/;"
         self.table_name = "cloudres"
@@ -17,6 +16,8 @@ class CosmosOperations(object):
             "RowKey" : "id",
             "count": 0 
         }
+
+
         self.user_agent= "azsdk-python-data-tables/12.4.2 Python/3.9.16 (Linux-5.10.102.2-microsoft-standard-x86_64-with-glibc2.31)"
         self.my_filter = "PartitionKey eq 'cloud'"
         

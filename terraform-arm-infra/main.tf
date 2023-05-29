@@ -236,8 +236,6 @@ resource "azurerm_resource_group" "rgstage" {
   name     = var.rgstage
   location = var.location
 }
-
-
 resource "azurerm_cosmosdb_account" "cosmosstage" {
   name                               = var.cosmosstage
   location                           = var.location

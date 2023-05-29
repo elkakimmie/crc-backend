@@ -11,6 +11,13 @@ variable "rg" {
   default     = "rgcrctopcug"
 }
 
+variable "rgstage" {
+  description = "Azure resource group"
+  type        = string
+  default     = "stagingcrctopcug"
+}
+
+
 variable "rgtest" {
   description = "Azure resource group"
   type        = string
@@ -18,12 +25,18 @@ variable "rgtest" {
 }
 
 
-
 variable "st" {
   description = "Azure storageaccount"
   type        = string
   default     = "stcrctopcug"
 }
+
+variable "ststage" {
+  description = "Azure ststage"
+  type        = string
+  default     = "ststagecrctopcug"
+}
+
 
 variable "sttest" {
   description = "Azure storageaccount"
@@ -43,16 +56,40 @@ variable "func" {
   default     = "funcrctopcug"
 }
 
+variable "funcstage" {
+  description = "Azure funcstage"
+  type        = string
+  default     = "funcstagerctopcug"
+}
+
 variable "cosmos" {
   description = "Azure storageaccount"
   type        = string
   default     = "cosmoscrctopcug"
 }
 
+variable "cosmosstage" {
+  description = "Azure storageaccount"
+  type        = string
+  default     = "cosmostagecrctopcug"
+}
+
 variable "appi" {
   description = "Azure storageaccount"
   type        = string
   default     = "appicrctopcug"
+}
+
+variable "appistage" {
+  description = "Azure appistage"
+  type        = string
+  default     = "appistagecrctopcug"
+}
+
+variable "aspstage" {
+  description = "Azure asp"
+  type        = string
+  default     = "aspstagecrctopcug"
 }
 
 variable "logic" {
@@ -79,10 +116,10 @@ variable "stc" {
   default     = "stcinfra"
 }
 
-variable "cdn" {
+variable "cdnp" {
   description = "Azure testlgappp"
   type        = string
-  default     = "cdncrctopcug"
+  default     = "cdnpcrctopcug"
 }
 
 
@@ -91,4 +128,11 @@ variable "ep" {
   type        = string
   default     = "epcrctopcug"
 }
+
+variable "funcslot" {
+  description = "Azure slot"
+  type        = string
+  default     = "funccrcstaging"
+}
+
 

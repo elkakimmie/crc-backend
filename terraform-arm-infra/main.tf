@@ -35,7 +35,6 @@ resource "azurerm_storage_container" "stc" {
   container_access_type = "private"
 }
 
-
 locals {
   cwd                = path.cwd
   module             = path.module
@@ -135,6 +134,8 @@ resource "azurerm_linux_function_app" "func" {
     }
   }
 }
+
+
 resource "azurerm_resource_group_template_deployment" "slack" {
   name                = "slack"
   resource_group_name = var.rg
@@ -161,11 +162,13 @@ resource "azurerm_resource_group_template_deployment" "ag" {
   deployment_mode     = "Incremental"
   template_content    = file("${path.module}/json/action-group.json")
 }
+
 #----------------------frontend---------------------------
+
+
 resource "azurerm_storage_account" "sttest" {
   name                     = var.sttest
   resource_group_name      = var.rg
-  min_tls_version          = "TLS1_2"
   location                 = var.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
@@ -175,8 +178,6 @@ resource "azurerm_storage_account" "sttest" {
     error_404_document = "404.html"
   }
 }
-
-
 
 resource "azurerm_storage_blob" "frontend" {
   for_each               = fileset("../frontend", "**/*")
@@ -189,3 +190,134 @@ resource "azurerm_storage_blob" "frontend" {
   content_md5            = filemd5("../frontend/${each.key}")
 }
 
+
+resource "azurerm_cdn_profile" "cdnp" {
+  name                = var.cdnp
+  location            = var.location
+  resource_group_name = var.rg
+  sku                 = "Standard_Microsoft"
+}
+
+resource "azurerm_cdn_endpoint" "ep" {
+  name                = var.ep
+  profile_name        = var.cdnp
+  location            = var.location
+  resource_group_name = var.rg
+  origin_host_header  = "sttestcrctopcug.z20.web.core.windows.net"
+
+  origin {
+    name      = "cloudrestopcu"
+    host_name = "sttestcrctopcug.z20.web.core.windows.net"
+  }
+
+  tags = {
+    environment = "crc"
+  }
+
+  delivery_rule {
+    name  = "EnforceHTTPS"
+    order = "1"
+
+    request_scheme_condition {
+      operator     = "Equal"
+      match_values = ["HTTP"]
+    }
+
+    url_redirect_action {
+      redirect_type = "Found"
+      protocol      = "Https"
+    }
+  }
+}
+
+#------------------------------------------staging env------------------------------
+
+resource "azurerm_resource_group" "rgstage" {
+  name     = var.rgstage
+  location = var.location
+}
+
+
+resource "azurerm_cosmosdb_account" "cosmosstage" {
+  name                               = var.cosmosstage
+  location                           = var.location
+  resource_group_name                = var.rgstage
+  offer_type                         = "Standard"
+  access_key_metadata_writes_enabled = false
+  kind                               = "GlobalDocumentDB"
+  enable_automatic_failover          = false
+  capabilities {
+    name = "EnableServerless"
+  }
+
+  capabilities {
+    name = "EnableTable"
+  }
+  geo_location {
+    location          = var.location
+    failover_priority = 0
+  }
+  consistency_policy {
+    consistency_level       = "BoundedStaleness"
+    max_interval_in_seconds = 300
+    max_staleness_prefix    = 100000
+  }
+}
+
+resource "azurerm_service_plan" "aspstage" {
+  name                = var.aspstage
+  resource_group_name = var.rgstage
+  location            = var.location
+  os_type             = "Linux"
+  sku_name            = "Y1"
+}
+
+#Create Storage account
+resource "azurerm_storage_account" "ststage" {
+  name                     = var.ststage
+  resource_group_name      = var.rgstage
+  location                 = var.location
+  min_tls_version          = "TLS1_2"
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  account_kind             = "StorageV2"
+}
+
+
+resource "azurerm_application_insights" "appistage" {
+  name                = var.appistage
+  location            = var.location
+  resource_group_name = var.rgstage
+  application_type    = "other"
+}
+
+resource "azurerm_linux_function_app" "funcstage" {
+  name                       = var.funcstage
+  resource_group_name        = var.rgstage
+  location                   = var.location
+  storage_account_name       = azurerm_storage_account.ststage.name
+  storage_account_access_key = azurerm_storage_account.ststage.primary_access_key
+  service_plan_id            = azurerm_service_plan.aspstage.id
+  zip_deploy_file            = "../backend/api/func.zip"
+
+
+  app_settings = {
+    ENABLE_ORYX_BUILD              = "true"
+    SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
+    connectionString               = "DefaultEndpointsProtocol=https;AccountName=${azurerm_cosmosdb_account.cosmosstage.name};AccountKey=${azurerm_cosmosdb_account.cosmosstage.primary_key};TableEndpoint=https://${azurerm_cosmosdb_account.cosmosstage.name}.table.cosmos.azure.com:443/;"
+    APPINSIGHTS_INSTRUMENTATIONKEY = azurerm_application_insights.appistage.instrumentation_key
+    linux_fx_version               = "PYTHON|3.9"
+
+  }
+  site_config {
+    application_stack {
+      python_version = "3.9"
+    }
+    cors {
+      allowed_origins = [
+        "*"
+      ]
+      support_credentials = false
+    }
+  }
+}

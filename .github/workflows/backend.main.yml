@@ -1,7 +1,7 @@
 name: Build
 
 on:
-  push:
+  pull_request:
     branches: ["main"]
     paths:
       - 'backend/**'
@@ -36,6 +36,35 @@ jobs:
         pip install -r requirements.txt
         python -m unittest test_table.py
 
+  deploy-to-staging:
+    runs-on: ubuntu-latest
+    environment:
+      name: 'staging'
+      url: 'https://funcstagerctopcug.azurewebsites.net'
+    needs: 
+      - build-backend
+    if: needs.build-backend.result == 'success'
+    steps:
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/api
+        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+        scm-do-build-during-deployment: true
+        enable-oryx-build: true
+
+    
+
+  deploy-to-prod:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == 'true'
+    environment:
+      name: 'production'
+      url: 'https://funcrctopcug.azurewebsites.net'
+    
+    steps:
     - name: 'Run Azure Functions Action'
       uses: Azure/functions-action@v1
       id: fa
